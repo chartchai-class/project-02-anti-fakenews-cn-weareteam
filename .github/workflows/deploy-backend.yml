@@ -50,7 +50,17 @@ jobs:
           script: |
             set -e
             APP_DIR="${{ secrets.DEPLOY_PATH }}"
-            JAR="${APP_DIR}/backend-0.0.1-SNAPSHOT.jar"
+            CANDIDATE="${APP_DIR}/backend-0.0.1-SNAPSHOT.jar"
+            if [ -f "$CANDIDATE" ]; then
+              JAR="$CANDIDATE"
+            else
+              JAR=$(find "$APP_DIR" -maxdepth 3 -type f -name "*.jar" | head -n1 || true)
+            fi
+            if [ -z "$JAR" ] || [ ! -f "$JAR" ]; then
+              echo "JAR file not found under $APP_DIR"
+              ls -lah "$APP_DIR" || true
+              exit 1
+            fi
             mv -f "$JAR" "${APP_DIR}/app.jar"
             if command -v systemctl >/dev/null 2>&1 && sudo systemctl list-unit-files | grep -q "${{ secrets.SERVICE_NAME }}.service"; then
               sudo systemctl restart "${{ secrets.SERVICE_NAME }}"
