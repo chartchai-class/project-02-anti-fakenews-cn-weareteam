@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/final_project?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:mysql123}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  mvc:
+    cors:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-me-secret}
+    expiration: ${JWT_EXP_SECONDS:86400}
+
+storage:
+  provider: ${STORAGE_PROVIDER:local} # local | s3
+  s3:
+    endpoint: ${S3_ENDPOINT:https://kpyoonwsfzkdddpvkaoo.storage.supabase.co/storage/v1/s3}
+    region: ${S3_REGION:ap-southeast-2}
+    bucket: ${S3_BUCKET:social-anti-fake-news}
+    accessKey: ${S3_ACCESS_KEY:3e8aa623ac95f115be49faa733b2c61a}
+    secretKey: ${S3_SECRET_KEY:0bdfdfeeec5613ade215643c5a22fd58cfee84e1e6fd28f585ee068486df59b1}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: INFO
