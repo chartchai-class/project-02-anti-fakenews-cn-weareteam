@@ -165,7 +165,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          source: "${{ steps.check.outputs.dir }}/dist/*"
+          source: "${{ steps.check.outputs.dir }}/dist/**"
           target: "~/frontend-dist"
           overwrite: true
           timeout: 600s
@@ -180,7 +180,7 @@ jobs:
           script: |
             set -e
             sudo mkdir -p /opt/final-project/frontend-dist
-            rsync -ah --delete ~/frontend-dist/ /opt/final-project/frontend-dist/
+            sudo rsync -ah --delete ~/frontend-dist/ /opt/final-project/frontend-dist/
             sudo tee /opt/final-project/nginx.conf >/dev/null <<'EOF'
             server {
               listen 80;
@@ -208,9 +208,9 @@ jobs:
               sudo systemctl enable --now docker
             fi
             if docker ps -a --format '{{.Names}}' | grep -q '^final-frontend$'; then
-              docker rm -f final-frontend || true
+              sudo docker rm -f final-frontend || true
             fi
-            docker run -d --name final-frontend -p 80:80 \
+            sudo docker run -d --name final-frontend -p 80:80 \
               -v /opt/final-project/frontend-dist:/usr/share/nginx/html:ro \
               -v /opt/final-project/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
               nginx:alpine
