@@ -27,7 +27,7 @@ jobs:
           ls -lah target
           du -h target/backend-0.0.1-SNAPSHOT.jar || true
         working-directory: backend
-      - name: Prepare remote directory
+      - name: Prepare remote directories
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -36,6 +36,7 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
+            mkdir -p "$HOME/final-project-upload"
       - name: Upload JAR to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -44,10 +45,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           source: "backend/target/backend-0.0.1-SNAPSHOT.jar"
-          target: "${{ secrets.DEPLOY_PATH }}"
+          target: "~"
           overwrite: true
           debug: true
           timeout: 600s
+          use_insecure_cipher: true
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -58,15 +60,20 @@ jobs:
           script: |
             set -e
             APP_DIR="${{ secrets.DEPLOY_PATH }}"
+            STAGING_DIR="$HOME"
             CANDIDATE="${APP_DIR}/backend-0.0.1-SNAPSHOT.jar"
             if [ -f "$CANDIDATE" ]; then
               JAR="$CANDIDATE"
             else
-              JAR=$(find "$APP_DIR" -maxdepth 3 -type f -name "*.jar" | head -n1 || true)
+              JAR=$(find "$STAGING_DIR" -maxdepth 1 -type f -name "backend-0.0.1-SNAPSHOT.jar" | head -n1 || true)
+              if [ -z "$JAR" ]; then
+                JAR=$(find "$APP_DIR" -maxdepth 3 -type f -name "*.jar" | head -n1 || true)
+              fi
             fi
             if [ -z "$JAR" ] || [ ! -f "$JAR" ]; then
               echo "JAR file not found under $APP_DIR"
               ls -lah "$APP_DIR" || true
+              ls -lah "$STAGING_DIR" || true
               exit 1
             fi
             mv -f "$JAR" "${APP_DIR}/app.jar"
