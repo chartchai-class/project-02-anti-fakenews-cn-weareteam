@@ -117,7 +117,15 @@ jobs:
               ls -lah "$STAGING_DIR" || true
               exit 1
             fi
-            mv -f "$JAR" "${APP_DIR}/app.jar"
+            mkdir -p "$APP_DIR"
+            DEST="${APP_DIR}/app.jar"
+            SRC_REAL=$(readlink -f "$JAR" 2>/dev/null || echo "$JAR")
+            DEST_REAL=$(readlink -f "$DEST" 2>/dev/null || echo "$DEST")
+            if [ "$SRC_REAL" != "$DEST_REAL" ]; then
+              cp -f "$JAR" "$DEST"
+            else
+              echo "Jar already at $DEST"
+            fi
             if command -v systemctl >/dev/null 2>&1 && sudo systemctl list-unit-files | grep -q "${{ secrets.SERVICE_NAME }}.service"; then
               sudo systemctl restart "${{ secrets.SERVICE_NAME }}"
             else
