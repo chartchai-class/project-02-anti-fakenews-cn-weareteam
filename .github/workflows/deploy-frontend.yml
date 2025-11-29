@@ -111,7 +111,7 @@ jobs:
               sudo apt-get install -y docker.io
               sudo systemctl enable --now docker
             fi
-            if docker ps -a --format '{{.Names}}' | grep -q '^final-frontend$'; then
+            if sudo docker ps -a --format '{{.Names}}' | grep -q '^final-frontend$'; then
               sudo docker rm -f final-frontend || true
             fi
             sudo docker run -d --name final-frontend -p 80:80 \
