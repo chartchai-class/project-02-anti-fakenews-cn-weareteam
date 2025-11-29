@@ -21,40 +21,57 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has_artifact: ${{ steps.check.outputs.present }}
+      frontend_dir: ${{ steps.check.outputs.dir }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Check project presence
         id: check
         run: |
-          if [ -f "project-01-anti-fakenews-cn-weareteam/package.json" ]; then
-            echo "present=true" >> $GITHUB_OUTPUT
-          else
+          set -e
+          CANDIDATES=(
+            "project-01-anti-fakenews-cn-weareteam"
+            "project-02-anti-fakenews-cn-weareteam"
+            "frontend"
+            "."
+          )
+          FOUND=""
+          for d in "${CANDIDATES[@]}"; do
+            if [ -f "$d/package.json" ]; then FOUND="$d"; break; fi
+          done
+          if [ -z "$FOUND" ]; then
+            FOUND=$(find . -maxdepth 2 -type f -name package.json | grep -v '^./backend/' | head -n1 | xargs dirname || true)
+          fi
+          if [ -z "$FOUND" ]; then
             echo "present=false" >> $GITHUB_OUTPUT
+          else
+            echo "present=true" >> $GITHUB_OUTPUT
+            echo "dir=$FOUND" >> $GITHUB_OUTPUT
+            echo "FRONTEND_DIR=$FOUND" >> $GITHUB_ENV
           fi
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
       - name: Install
-        working-directory: project-01-anti-fakenews-cn-weareteam
+        working-directory: ${{ env.FRONTEND_DIR }}
         if: ${{ steps.check.outputs.present == 'true' }}
         run: npm ci || npm install
       - name: Compute base path
         if: ${{ steps.check.outputs.present == 'true' }}
         run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
       - name: Build
-        working-directory: project-01-anti-fakenews-cn-weareteam
+        working-directory: ${{ env.FRONTEND_DIR }}
         if: ${{ steps.check.outputs.present == 'true' }}
         run: npm run build -- --base=/${{ env.REPO_NAME }}/
       - name: SPA 404 fallback
         if: ${{ steps.check.outputs.present == 'true' }}
-        run: cp project-01-anti-fakenews-cn-weareteam/dist/index.html project-01-anti-fakenews-cn-weareteam/dist/404.html
+        run: cp "$FRONTEND_DIR"/dist/index.html "$FRONTEND_DIR"/dist/404.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         if: ${{ steps.check.outputs.present == 'true' }}
         with:
-          path: project-01-anti-fakenews-cn-weareteam/dist
+          path: ${{ env.FRONTEND_DIR }}/dist
 
   deploy:
     environment:
