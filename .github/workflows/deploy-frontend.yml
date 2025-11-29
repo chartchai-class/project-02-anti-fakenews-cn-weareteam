@@ -85,6 +85,16 @@ jobs:
             set -e
             sudo mkdir -p /opt/final-project/frontend-dist
             sudo rsync -ah --delete ~/frontend-dist/ /opt/final-project/frontend-dist/
+            if [ ! -f /opt/final-project/frontend-dist/index.html ]; then
+              IDX=$(find /opt/final-project/frontend-dist -maxdepth 4 -type f -name index.html | head -n1 || true)
+              if [ -n "$IDX" ]; then
+                BASE=$(dirname "$IDX")
+                echo "Relocating files from $BASE to /opt/final-project/frontend-dist"
+                sudo rsync -ah --delete "$BASE"/ /opt/final-project/frontend-dist/
+              fi
+            fi
+            echo "Deployed files:"
+            ls -lah /opt/final-project/frontend-dist | head -n 50
             sudo tee /opt/final-project/nginx.conf >/dev/null <<'EOF'
             server {
               listen 80;
@@ -125,3 +135,8 @@ jobs:
               -v /opt/final-project/frontend-dist:/usr/share/nginx/html:ro \
               -v /opt/final-project/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
               nginx:alpine
+            echo "Container status:"
+            sudo docker ps -a | grep final-frontend || true
+            echo "Local curl:"
+            (curl -sI http://127.0.0.1/ | head -n1) || true
+            (curl -fsS http://127.0.0.1/ | head -c 200) || true
