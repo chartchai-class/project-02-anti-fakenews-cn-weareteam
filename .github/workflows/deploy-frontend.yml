@@ -71,6 +71,8 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           source: "${{ steps.check.outputs.dir }}/dist/**"
           target: "~/frontend-dist"
+          strip_components: 2
+          rm: true
           overwrite: true
           timeout: 600s
           use_insecure_cipher: true
@@ -85,14 +87,6 @@ jobs:
             set -e
             sudo mkdir -p /opt/final-project/frontend-dist
             sudo rsync -ah --delete ~/frontend-dist/ /opt/final-project/frontend-dist/
-            if [ ! -f /opt/final-project/frontend-dist/index.html ]; then
-              IDX=$(find /opt/final-project/frontend-dist -maxdepth 4 -type f -name index.html | head -n1 || true)
-              if [ -n "$IDX" ]; then
-                BASE=$(dirname "$IDX")
-                echo "Relocating files from $BASE to /opt/final-project/frontend-dist"
-                sudo rsync -ah --delete "$BASE"/ /opt/final-project/frontend-dist/
-              fi
-            fi
             echo "Deployed files:"
             ls -lah /opt/final-project/frontend-dist | head -n 50
             sudo tee /opt/final-project/nginx.conf >/dev/null <<'EOF'
