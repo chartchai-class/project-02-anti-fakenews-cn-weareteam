@@ -65,9 +65,9 @@ jobs:
             if [ -f "$CANDIDATE" ]; then
               JAR="$CANDIDATE"
             else
-              JAR=$(find "$STAGING_DIR" -maxdepth 1 -type f -name "backend-0.0.1-SNAPSHOT.jar" | head -n1 || true)
+              JAR=$(find "$STAGING_DIR" -maxdepth 5 -type f -name "backend-0.0.1-SNAPSHOT.jar" | head -n1 || true)
               if [ -z "$JAR" ]; then
-                JAR=$(find "$APP_DIR" -maxdepth 3 -type f -name "*.jar" | head -n1 || true)
+                JAR=$(find "$APP_DIR" -maxdepth 5 -type f -name "*.jar" | head -n1 || true)
               fi
             fi
             if [ -z "$JAR" ] || [ ! -f "$JAR" ]; then
