@@ -47,7 +47,7 @@ jobs:
           target: "${{ secrets.DEPLOY_PATH }}"
           overwrite: true
           debug: true
-          timeout: 600
+          timeout: 600s
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
