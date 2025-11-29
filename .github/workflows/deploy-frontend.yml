@@ -55,11 +55,11 @@ jobs:
             echo "FRONTEND_DIR=${{ steps.check.outputs.dir }}" >> $GITHUB_ENV
           else
             mkdir -p fallback_site
-            cat > fallback_site/index.html <<'HTML'
-            <!doctype html>
-            <html><head><meta charset="utf-8"><title>Site not built</title></head>
-            <body><h1>Frontend not found</h1><p>No frontend package.json detected. This placeholder page was published by the workflow.</p></body></html>
-            HTML
+            printf '%s\n' \
+              '<!doctype html>' \
+              '<html><head><meta charset="utf-8"><title>Site not built</title></head>' \
+              '<body><h1>Frontend not found</h1><p>No frontend package.json detected. This placeholder page was published by the workflow.</p></body></html>' \
+              > fallback_site/index.html
             echo "dir=fallback_site" >> $GITHUB_OUTPUT
           fi
       - name: Setup Node
