@@ -77,10 +77,12 @@ jobs:
             done
             exit 1
       - name: External health check (optional)
-        if: ${{ secrets.HEALTHCHECK_URL != '' }}
+        env:
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+        if: ${{ env.HEALTHCHECK_URL != '' }}
         run: |
           for i in {1..30}; do
-            if curl -fsS "${{ secrets.HEALTHCHECK_URL }}" >/dev/null; then
+            if curl -fsS "$HEALTHCHECK_URL" >/dev/null; then
               exit 0
             fi
             sleep 2
