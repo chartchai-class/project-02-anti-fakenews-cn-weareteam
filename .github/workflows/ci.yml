@@ -7,7 +7,6 @@ on:
 
 jobs:
   frontend:
-    if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -20,10 +19,13 @@ jobs:
         with:
           node-version: '20'
       - name: Install deps
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: npm ci || npm install
       - name: Lint
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: npm run lint -- --max-warnings=0
       - name: Build
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: npm run build
 
   backend:

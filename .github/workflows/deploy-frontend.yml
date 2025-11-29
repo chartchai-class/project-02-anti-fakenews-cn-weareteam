@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,16 +21,21 @@ jobs:
         with:
           node-version: '20'
       - name: Install
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: npm ci || npm install
         working-directory: project-01-anti-fakenews-cn-weareteam
       - name: Compute base path
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
       - name: Build
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: npm run build -- --base=/${{ env.REPO_NAME }}/
         working-directory: project-01-anti-fakenews-cn-weareteam
       - name: SPA 404 fallback
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         run: cp project-01-anti-fakenews-cn-weareteam/dist/index.html project-01-anti-fakenews-cn-weareteam/dist/404.html
       - name: Deploy
+        if: ${{ hashFiles('project-01-anti-fakenews-cn-weareteam/package.json') != '' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
