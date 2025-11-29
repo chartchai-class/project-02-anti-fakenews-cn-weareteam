@@ -20,7 +20,12 @@ jobs:
           java-version: '17'
           cache: 'maven'
       - name: Build JAR
-        run: mvn -B -DskipTests package
+        run: mvn -B -DskipTests package spring-boot:repackage
+        working-directory: backend
+      - name: Show built artifact
+        run: |
+          ls -lah target
+          du -h target/backend-0.0.1-SNAPSHOT.jar || true
         working-directory: backend
       - name: Prepare remote directory
         uses: appleboy/ssh-action@v1.0.3
