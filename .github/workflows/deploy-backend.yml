@@ -58,4 +58,3 @@ jobs:
               pkill -f "${APP_DIR}/app.jar" || true
               nohup java -jar "${APP_DIR}/app.jar" > "${APP_DIR}/app.log" 2>&1 &
             fi
-
