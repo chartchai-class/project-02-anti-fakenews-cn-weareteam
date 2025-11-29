@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const BASE = (import.meta.env.VITE_API_BASE_URL != null
+  ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/+$/, '')
+  : 'http://localhost:8080')
 
 let token = localStorage.getItem('token') || ''
 
@@ -15,7 +17,7 @@ export function getToken() {
 export async function apiFetch(path, opts = {}) {
   const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {})
   if (token) headers['Authorization'] = `Bearer ${token}`
-  const res = await fetch(BASE + path, { ...opts, headers })
+  const res = await fetch(BASE ? BASE + path : path, { ...opts, headers })
   if (!res.ok) {
     let msg = `${res.status}`
     try {
@@ -41,7 +43,7 @@ export async function apiFetch(path, opts = {}) {
 export async function apiForm(path, formData, headers = {}) {
   const h = Object.assign({}, headers)
   if (token) h['Authorization'] = `Bearer ${token}`
-  const res = await fetch(BASE + path, { method: 'POST', body: formData, headers: h })
+  const res = await fetch(BASE ? BASE + path : path, { method: 'POST', body: formData, headers: h })
   if (!res.ok) throw new Error(String(res.status))
   return res.json()
 }
