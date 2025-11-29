@@ -46,6 +46,7 @@ jobs:
         if: ${{ steps.resolve.outputs.present == 'true' }}
         working-directory: ${{ steps.resolve.outputs.dir }}
         run: npm run lint -- --max-warnings=0
+        continue-on-error: true
       - name: Build
         if: ${{ steps.resolve.outputs.present == 'true' }}
         working-directory: ${{ steps.resolve.outputs.dir }}

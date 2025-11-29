@@ -41,11 +41,18 @@ jobs:
           if [ -z "$FOUND" ]; then
             FOUND=$(find . -maxdepth 2 -type f -name package.json | grep -v '^./backend/' | head -n1 | xargs dirname || true)
           fi
+          if [ -n "$FOUND" ]; then
+            echo "present=true" >> $GITHUB_OUTPUT
+            echo "dir=$FOUND" >> $GITHUB_OUTPUT
+          else
+            echo "present=false" >> $GITHUB_OUTPUT
+          fi
       - name: Set publish dir
         id: setdir
         run: |
           if [ "${{ steps.check.outputs.present }}" = "true" ]; then
-            echo "dir=${FRONTEND_DIR}/dist" >> $GITHUB_OUTPUT
+            echo "dir=${{ steps.check.outputs.dir }}/dist" >> $GITHUB_OUTPUT
+            echo "FRONTEND_DIR=${{ steps.check.outputs.dir }}" >> $GITHUB_ENV
           else
             mkdir -p fallback_site
             cat > fallback_site/index.html <<'HTML'
@@ -54,13 +61,6 @@ jobs:
             <body><h1>Frontend not found</h1><p>No frontend package.json detected. This placeholder page was published by the workflow.</p></body></html>
             HTML
             echo "dir=fallback_site" >> $GITHUB_OUTPUT
-          fi
-          if [ -z "$FOUND" ]; then
-            echo "present=false" >> $GITHUB_OUTPUT
-          else
-            echo "present=true" >> $GITHUB_OUTPUT
-            echo "dir=$FOUND" >> $GITHUB_OUTPUT
-            echo "FRONTEND_DIR=$FOUND" >> $GITHUB_ENV
           fi
       - name: Setup Node
         uses: actions/setup-node@v4
