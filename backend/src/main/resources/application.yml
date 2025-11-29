@@ -13,6 +13,12 @@ spring:
   mvc:
     cors:
       enabled: true
+      mappings:
+        "[/api/**]":
+          allowed-origins: ${ALLOWED_ORIGINS:https://chartchai-class.github.io,https://43-142-75-247.sslip.io}
+          allowed-methods: "*"
+          allowed-headers: "*"
+          max-age: 3600
 
 server:
   port: ${PORT:8080}
@@ -28,8 +34,8 @@ storage:
     endpoint: ${S3_ENDPOINT:https://kpyoonwsfzkdddpvkaoo.storage.supabase.co/storage/v1/s3}
     region: ${S3_REGION:ap-southeast-2}
     bucket: ${S3_BUCKET:social-anti-fake-news}
-    accessKey: ${S3_ACCESS_KEY:3e8aa623ac95f115be49faa733b2c61a}
-    secretKey: ${S3_SECRET_KEY:0bdfdfeeec5613ade215643c5a22fd58cfee84e1e6fd28f585ee068486df59b1}
+    accessKey: ${S3_ACCESS_KEY:}
+    secretKey: ${S3_SECRET_KEY:}
 
 logging:
   level:
