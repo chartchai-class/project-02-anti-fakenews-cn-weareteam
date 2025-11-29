@@ -6,6 +6,19 @@ on:
     paths:
       - 'backend/**'
   workflow_dispatch:
+    inputs:
+      skip_upload:
+        description: 'Skip building/uploading jar (just restart & optional config)'
+        type: boolean
+        default: false
+      write_external_config:
+        description: 'Write Spring application.yml to remote (CORS etc.)'
+        type: boolean
+        default: true
+      allowed_origins:
+        description: 'Comma list of allowed origins for CORS'
+        type: string
+        default: 'https://chartchai-class.github.io'
 
 jobs:
   deploy:
@@ -20,9 +33,11 @@ jobs:
           java-version: '17'
           cache: 'maven'
       - name: Build JAR
+        if: ${{ inputs.skip_upload != true }}
         run: mvn -B -DskipTests package spring-boot:repackage
         working-directory: backend
       - name: Show built artifact
+        if: ${{ inputs.skip_upload != true }}
         run: |
           ls -lah target
           du -h target/backend-0.0.1-SNAPSHOT.jar || true
@@ -37,7 +52,33 @@ jobs:
           script: |
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
             mkdir -p "$HOME/final-project-upload"
+      - name: Write external application.yml (optional)
+        if: ${{ inputs.write_external_config == true }}
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          ALLOWED_ORIGINS: ${{ inputs.allowed_origins }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.DEPLOY_PATH }}"
+            cat > "$APP_DIR/application.yml" <<EOF
+            spring:
+              mvc:
+                cors:
+                  enabled: true
+                  mappings:
+                    [/api/**]:
+                      allowed-origins: ${ALLOWED_ORIGINS}
+                      allowed-methods: "*"
+                      allowed-headers: "*"
+                      max-age: 3600
+            EOF
       - name: Upload JAR to server
+        if: ${{ inputs.skip_upload != true }}
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
