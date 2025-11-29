@@ -20,9 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - name: Install
-        run: npm ci
+        run: npm ci || npm install
         working-directory: project-01-anti-fakenews-cn-weareteam
       - name: Compute base path
         run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
