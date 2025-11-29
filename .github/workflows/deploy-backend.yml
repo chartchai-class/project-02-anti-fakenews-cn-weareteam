@@ -45,6 +45,9 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           source: "backend/target/backend-0.0.1-SNAPSHOT.jar"
           target: "${{ secrets.DEPLOY_PATH }}"
+          overwrite: true
+          debug: true
+          timeout: 600
       - name: Restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
